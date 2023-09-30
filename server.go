@@ -47,27 +47,24 @@ func (this *Server) BroadCast(user *User, msg string) {
 func (this *Server) Handler(conn net.Conn) {
 	fmt.Println("链接建立成功")
 
-	user := NewUser(conn)
+	user := NewUser(conn, this)
 
-	this.mapLock.Lock()
-	this.OnlineMap[user.Name] = user
-	this.mapLock.Unlock()
-
-	this.BroadCast(user, "已上线")
+	user.Online()
 
 	go func() {
 		buf := make([]byte, 4096)
 		for {
 			n, err := conn.Read(buf)
 			if n == 0 {
-				this.BroadCast(user, "下线")
+				user.Offline()
+				return
 			}
 			if err != nil && err != io.EOF {
 				fmt.Println("Conn Read err:", err)
 				return
 			}
 			msg := string(buf[:n-1])
-			this.BroadCast(user, msg)
+			user.DoMessage(msg)
 		}
 	}()
 
