@@ -63,7 +63,7 @@ func (client *Client) Run() {
 		}
 		switch client.flag {
 		case 1:
-			fmt.Println("进入公聊模式")
+			client.PublicChat()
 			break
 		case 2:
 			fmt.Println("进入私聊模式")
@@ -87,6 +87,27 @@ func (client *Client) UpdateName() bool {
 		return false
 	}
 	return true
+}
+
+func (client *Client) PublicChat() {
+	var chatMsg string
+	fmt.Println(">>>>>>>请输入聊天内容，exit退出>>>>>>>")
+	fmt.Scanln(&chatMsg)
+
+	for chatMsg != "exit" {
+		if len(chatMsg) != 0 {
+			sendMsg := chatMsg + "\n"
+			_, err := client.conn.Write([]byte(sendMsg))
+			if err != nil {
+				fmt.Println("conn Write err:", err)
+				break
+			}
+
+			chatMsg = ""
+			fmt.Println(">>>>>>>请输入聊天内容，exit退出>>>>>>>")
+			fmt.Scanln(&chatMsg)
+		}
+	}
 }
 
 var serverIp string
